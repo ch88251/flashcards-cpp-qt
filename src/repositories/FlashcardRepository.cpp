@@ -1,1 +1,62 @@
 #include "FlashcardRepository.h"
+#include "domain/Flashcard.h"
+#include <vector>
+#include <QString>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QVariant>
+#include <QDebug>
+
+bool FlashcardRepository::save(const Flashcard& flashcard)
+{
+    QSqlQuery query;
+
+    query.prepare(R"(
+        INSERT INTO cards (deck_id, front, back)
+        VALUES (:deck_id, :front, :back)
+    )");
+
+    query.bindValue(":deck_id", flashcard.deckId);
+    query.bindValue(":front", QString::fromStdString(flashcard.front));
+    query.bindValue(":back", QString::fromStdString(flashcard.back));
+
+    if (!query.exec()) {
+        qCritical() << "Failed to save flashcard:"
+                    << query.lastError().text();
+        return false;
+    }
+
+    return true;
+}
+
+std::vector<Flashcard> FlashcardRepository::findAll()
+{
+    std::vector<Flashcard> flashcards;
+
+    QSqlQuery query;
+
+    if (!query.exec(R"(
+        SELECT id, deck_id, front, back
+        FROM cards
+        ORDER BY id
+    )"))
+    {
+        qCritical() << "Failed to find flashcards:"
+                    << query.lastError().text();
+
+        return flashcards;
+    }
+
+    while (query.next())
+    {
+        Flashcard flashcard;
+        flashcard.id = query.value("id").toInt();
+        flashcard.deckId = query.value("deck_id").toInt();
+        flashcard.front = query.value("front").toString().toStdString();
+        flashcard.back = query.value("back").toString().toStdString();
+
+        flashcards.push_back(flashcard);
+    }
+
+    return flashcards;
+}

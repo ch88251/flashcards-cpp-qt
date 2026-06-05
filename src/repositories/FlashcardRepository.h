@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "Flashcard.h"
+#include "domain/Flashcard.h"
 
 class FlashcardRepository
 {
