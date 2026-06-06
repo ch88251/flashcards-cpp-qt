@@ -3,12 +3,14 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
+#include <QDir>
 
 bool DatabaseManager::open()
 {
     m_database = QSqlDatabase::addDatabase("QSQLITE");
     m_database.setDatabaseName("flashcards.db");
-
+    qDebug() << "Current working directory:" << QDir::currentPath();
+    qDebug() << "Opening database:" << m_database.databaseName();
     if (!m_database.open()) {
         qDebug() << "Failed to open database:" << m_database.lastError().text();
         return false;
@@ -48,5 +50,9 @@ bool DatabaseManager::initializeSchema()
         return false;
     }
 
+    query.exec(R"(
+        INSERT OR IGNORE INTO decks (id, name)
+        VALUES (1, 'Default')
+    )");
     return true;
 }

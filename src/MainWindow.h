@@ -1,6 +1,11 @@
 #pragma once
 
 #include <QMainWindow>
+#include "repositories/DeckRepository.h"
+#include "repositories/FlashcardRepository.h"
+
+class QListWidget;
+class QTableWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -8,4 +13,15 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
+
+private:
+    void setupUi();
+    void loadDecks();
+    void loadFlashcards();
+
+    QListWidget* deckList{nullptr};
+    QTableWidget* flashcardTable{nullptr};
+
+    DeckRepository deckRepository;
+    FlashcardRepository flashcardRepository;    
 };

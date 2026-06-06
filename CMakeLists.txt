@@ -17,6 +17,7 @@ qt_add_executable(flashcards
     src/MainWindow.cpp
     src/db/DatabaseManager.cpp
     src/repositories/FlashcardRepository.cpp
+    src/repositories/DeckRepository.cpp
 )
 
 target_include_directories(flashcards
