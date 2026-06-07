@@ -16,11 +16,15 @@ public:
 
 private:
     void setupUi();
+    void refreshUi();
     void loadDecks();
     void loadFlashcards();
+    void onDeckSelected(int row);
 
     QListWidget* deckList{nullptr};
     QTableWidget* flashcardTable{nullptr};
+
+    int selectedDeckId{-1};
 
     DeckRepository deckRepository;
     FlashcardRepository flashcardRepository;    

@@ -60,3 +60,38 @@ std::vector<Flashcard> FlashcardRepository::findAll()
 
     return flashcards;
 }
+
+std::vector<Flashcard> FlashcardRepository::findByDeckId(int deckId)
+{
+    std::vector<Flashcard> flashcards;
+
+    QSqlQuery query;
+    query.prepare(R"(
+        SELECT id, deck_id, front, back
+        FROM cards
+        WHERE deck_id = :deck_id
+        ORDER BY id
+    )");
+    query.bindValue(":deck_id", deckId);
+
+    if (!query.exec())
+    {
+        qCritical() << "Failed to find flashcards by deck id:"
+                    << query.lastError().text();
+
+        return flashcards;
+    }
+
+    while (query.next())
+    {
+        Flashcard flashcard;
+        flashcard.id = query.value("id").toInt();
+        flashcard.deckId = query.value("deck_id").toInt();
+        flashcard.front = query.value("front").toString().toStdString();
+        flashcard.back = query.value("back").toString().toStdString();
+
+        flashcards.push_back(flashcard);
+    }
+
+    return flashcards;
+}

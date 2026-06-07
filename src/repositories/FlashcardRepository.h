@@ -8,4 +8,5 @@ class FlashcardRepository
 public:
     bool save(const Flashcard& flashcard);
     std::vector<Flashcard> findAll();
+    std::vector<Flashcard> findByDeckId(int deckId);
 };

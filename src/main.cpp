@@ -1,7 +1,7 @@
 #include <QApplication>
 #include <QDebug>
 
-#include "MainWindow.h"
+#include "gui/MainWindow.h"
 #include "db/DatabaseManager.h"
 #include "domain/Flashcard.h"
 #include "repositories/FlashcardRepository.h"

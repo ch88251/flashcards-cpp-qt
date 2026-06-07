@@ -14,7 +14,7 @@ qt_standard_project_setup()
 
 qt_add_executable(flashcards
     src/main.cpp
-    src/MainWindow.cpp
+    src/gui/MainWindow.cpp
     src/db/DatabaseManager.cpp
     src/repositories/FlashcardRepository.cpp
     src/repositories/DeckRepository.cpp
