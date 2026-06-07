@@ -20,6 +20,8 @@ private:
     void loadDecks();
     void loadFlashcards();
     void onDeckSelected(int row);
+    void createDeck();
+    void createFlashcard();
 
     QListWidget* deckList{nullptr};
     QTableWidget* flashcardTable{nullptr};

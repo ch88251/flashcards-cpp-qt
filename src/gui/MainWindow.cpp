@@ -1,11 +1,15 @@
 #include "MainWindow.h"
 
+#include <QToolBar>
 #include <QLabel>
 #include <QListWidget>
 #include <QListWidgetItem>
 #include <QTableWidget>
 #include <QSplitter>
 #include <QHeaderView>
+#include <QInputDialog>
+#include <QPushButton>
+#include <QVBoxLayout>
 #include <QDebug>
 
 #include "repositories/DeckRepository.h"
@@ -23,19 +27,32 @@ void MainWindow::setupUi()
     setWindowTitle("Flashcard App");
     resize(900, 600);
 
+    auto* centralWidget = new QWidget(this);
+
+    QToolBar* toolbar = addToolBar("Main");
+    QAction* addDeckAction = toolbar->addAction("Add Deck");
+    QAction* addFlashcardAction = toolbar->addAction("Add Flashcard");
+
+    connect(
+        addDeckAction,
+        &QAction::triggered,
+        this,
+        &MainWindow::createDeck);
+
+    connect(
+        addFlashcardAction,
+        &QAction::triggered,
+        this,        
+        &MainWindow::createFlashcard);
+
+    auto* mainLayout = new QVBoxLayout(centralWidget);
+
     auto* splitter = new QSplitter(this);
 
-    deckList = new QListWidget(splitter);
+    mainLayout->addWidget(splitter);
 
-    // connect(
-    //     deckList,
-    //     &QListWidget::itemClicked,
-    //     this,
-    //     [this](QListWidgetItem* item)
-    //     {
-    //         selectedDeckId = item->data(Qt::UserRole).toInt();
-    //         qDebug() << "Clicked deck id:" << selectedDeckId;
-    //     });
+
+    deckList = new QListWidget(splitter);
 
     connect(
         deckList,
@@ -50,7 +67,7 @@ void MainWindow::setupUi()
 
     splitter->setSizes({200, 700});
 
-    setCentralWidget(splitter); 
+    setCentralWidget(centralWidget); 
 
 }
 
@@ -124,4 +141,42 @@ void MainWindow::onDeckSelected(int row)
     qDebug() << "Selected deck id:" << selectedDeckId;
 
     loadFlashcards();
+}
+
+void MainWindow::createDeck()
+{
+    QString deckName =
+        QInputDialog::getText(
+            this,
+            "Add Deck",
+            "Deck Name:")
+            .trimmed();
+
+    if (deckName.isEmpty())
+    {
+        return;
+    }
+    
+    Deck deck;
+    deck.name = deckName.toStdString();
+
+    if (deckRepository.save(deck))
+    {
+        loadDecks();
+    }    
+}
+
+void MainWindow::createFlashcard()
+{
+    QString front =
+        QInputDialog::getText(
+            this,
+            "Add Flashcard",
+            "Front:");
+
+    QString back =
+        QInputDialog::getText(
+            this,
+            "Add Flashcard",
+            "Back:");
 }

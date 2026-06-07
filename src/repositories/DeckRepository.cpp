@@ -6,58 +6,51 @@
 
 bool DeckRepository::save(const Deck &deck)
 {
-  QSqlQuery query;
+    QSqlQuery query;
 
-  query.prepare(R"(
-    insert into deck (
-      id,
-      name
-    ) values (
-      :deck_id,
-      :name
-    )
-  )");
+    query.prepare(R"(
+        INSERT INTO decks (name)
+        VALUES (:name)
+    )");
 
-  query.bindValue(":deck_id", deck.id);
-  query.bindValue(":name", QString::fromStdString(deck.name));
+    query.bindValue(":name", QString::fromStdString(deck.name));
 
-  if (!query.exec())
-  {
-    qCritical() << "Error saving deck!"
-                << query.lastError().text();
+    if (!query.exec())
+    {
+        qCritical() << "Failed to save deck:"
+                    << query.lastError().text();
+        return false;
+    }
 
-    return false;
-  }
-
-  return true;
+    return true;
 }
 
 std::vector<Deck> DeckRepository::findAll()
 {
-  std::vector<Deck> decks;
+    std::vector<Deck> decks;
 
-  QSqlQuery query;
+    QSqlQuery query;
 
-  if (!query.exec(R"(
+    if (!query.exec(R"(
       SELECT id, name
       FROM decks
       ORDER BY name
-  )"))
-  {
-      qCritical() << "Failed to find decks:"
-                  << query.lastError().text();
+    )"))
+    {
+        qCritical() << "Failed to find decks:"
+                    << query.lastError().text();
 
-      return decks;
-  }
+        return decks;
+    }
 
-  while (query.next())
-  {
-      Deck deck;
-      deck.id = query.value("id").toInt();
-      deck.name = query.value("name").toString().toStdString();
+    while (query.next())
+    {
+        Deck deck;
+        deck.id = query.value("id").toInt();
+        deck.name = query.value("name").toString().toStdString();
 
-      decks.push_back(deck);
-  }
+        decks.push_back(deck);
+    }
 
-  return decks;
+    return decks;
 }
