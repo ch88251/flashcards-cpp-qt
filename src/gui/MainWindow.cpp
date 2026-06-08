@@ -8,8 +8,12 @@
 #include <QSplitter>
 #include <QHeaderView>
 #include <QInputDialog>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QFormLayout>
+#include <QTextEdit>
+#include <QDialogButtonBox>
 #include <QDebug>
 
 #include "repositories/DeckRepository.h"
@@ -145,18 +149,34 @@ void MainWindow::onDeckSelected(int row)
 
 void MainWindow::createDeck()
 {
-    QString deckName =
-        QInputDialog::getText(
-            this,
-            "Add Deck",
-            "Deck Name:")
-            .trimmed();
 
-    if (deckName.isEmpty())
+    QDialog dialog(this);
+    dialog.setWindowTitle("Create Deck");
+    dialog.resize(300, 150);
+
+    auto* layout = new QVBoxLayout(&dialog);
+    auto* formLayout = new QFormLayout();
+
+    auto* nameEdit = new QLineEdit(&dialog);
+    formLayout->addRow("Deck Name:", nameEdit);
+
+    auto* buttons = new QDialogButtonBox(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel,
+        &dialog);
+
+    layout->addLayout(formLayout);
+    layout->addWidget(buttons);
+
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted)
     {
         return;
     }
-    
+
+    QString deckName = nameEdit->text().trimmed();
+
     Deck deck;
     deck.name = deckName.toStdString();
 
@@ -168,15 +188,65 @@ void MainWindow::createDeck()
 
 void MainWindow::createFlashcard()
 {
-    QString front =
-        QInputDialog::getText(
+    if (selectedDeckId <= 0)
+    {
+        QMessageBox::warning(
             this,
-            "Add Flashcard",
-            "Front:");
+            "No Deck Selected",
+            "Please select a deck before adding a flashcard.");
+        return;
+    }
 
-    QString back =
-        QInputDialog::getText(
+    QDialog dialog(this);
+    dialog.setWindowTitle("Create Flashcard");
+    dialog.resize(500, 350);
+
+    auto* layout = new QVBoxLayout(&dialog);
+    auto* formLayout = new QFormLayout();
+
+    auto* frontEdit = new QTextEdit(&dialog);
+    auto* backEdit = new QTextEdit(&dialog);
+
+    frontEdit->setMinimumHeight(100);
+    backEdit->setMinimumHeight(100);
+
+    formLayout->addRow("Front:", frontEdit);
+    formLayout->addRow("Back:", backEdit);
+
+    auto* buttons = new QDialogButtonBox(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel,
+        &dialog);
+
+    layout->addLayout(formLayout);
+    layout->addWidget(buttons);    
+
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    QString front = frontEdit->toPlainText().trimmed();
+    QString back = backEdit->toPlainText().trimmed();
+
+    if (front.isEmpty() || back.isEmpty())
+    {
+        QMessageBox::warning(
             this,
-            "Add Flashcard",
-            "Back:");
+            "Missing Information",
+            "Both front and back are required.");
+        return;
+    }
+
+    Flashcard flashcard;
+    flashcard.deckId = selectedDeckId;
+    flashcard.front = front.toStdString();
+    flashcard.back = back.toStdString();
+
+    if (flashcardRepository.save(flashcard))
+    {
+        loadFlashcards();
+    }    
 }
