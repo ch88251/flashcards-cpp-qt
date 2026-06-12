@@ -22,6 +22,9 @@ private:
     void onDeckSelected(int row);
     void createDeck();
     void createFlashcard();
+    void editFlashcard(int row);
+    void deleteFlashcard(int row);
+    void showFlashcardContextMenu(const QPoint& pos);
 
     QListWidget* deckList{nullptr};
     QTableWidget* flashcardTable{nullptr};

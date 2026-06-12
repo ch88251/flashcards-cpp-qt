@@ -95,3 +95,47 @@ std::vector<Flashcard> FlashcardRepository::findByDeckId(int deckId)
 
     return flashcards;
 }
+
+bool FlashcardRepository::update(const Flashcard& flashcard)
+{
+  QSqlQuery query;
+
+  query.prepare(R"(
+    UPDATE cards
+    SET front = :front,
+        back = :back
+    WHERE id = :id
+  )");
+
+  query.bindValue(":front", QString::fromStdString(flashcard.front));
+  query.bindValue(":back", QString::fromStdString(flashcard.back));
+  query.bindValue(":id", flashcard.id);
+
+  if (!query.exec()) {
+    qCritical() << "Failed to update flashcard: "
+                << query.lastError().text();
+    return false;
+  }
+
+  return true;
+}
+
+bool FlashcardRepository::remove(int id)
+{
+  QSqlQuery query;
+
+  query.prepare(R"(
+    DELETE FROM cards
+    WHERE id = :id
+  )");
+
+  query.bindValue(":id", id);
+
+  if (!query.exec()) {
+    qCritical() << "Failed to delete flashcard: "
+                << query.lastError().text();
+    return false;
+  }
+
+  return true;
+}
