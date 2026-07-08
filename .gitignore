@@ -1,1 +1,28 @@
+# Build directories
 build/
+cmake-build-*/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+compile_commands.json
+
+# Qt generated files
+.qt/
+*_autogen/
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+
+# Qt Creator
+*.pro.user
+*.pro.user.*
+*.qbs.user
+
+# Visual Studio Code
+.vscode/
+
+# macOS
+.DS_Store

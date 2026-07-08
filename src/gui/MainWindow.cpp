@@ -298,7 +298,71 @@ void MainWindow::showFlashcardContextMenu(const QPoint& pos)
 
 void MainWindow::editFlashcard(int row)
 {
-    qDebug() << "Edit row:" << row;
+    auto* frontItem = flashcardTable->item(row, 0);
+    auto* backItem = flashcardTable->item(row, 1);
+
+    if (!frontItem || !backItem) {
+        return;
+    }
+
+    int flashcardId = frontItem->data(Qt::UserRole).toInt();
+
+    QDialog dialog(this);
+    dialog.setWindowTitle("Edit Flashcard");
+    dialog.resize(500, 350);
+
+    auto* layout = new QVBoxLayout(&dialog);
+    auto* formLayout = new QFormLayout();
+
+    auto* frontEdit = new QTextEdit(&dialog);
+    auto* backEdit = new QTextEdit(&dialog);
+
+    frontEdit->setPlainText(frontItem->text());
+    backEdit->setPlainText(backItem->text());
+
+    frontEdit->setMinimumHeight(100);
+    backEdit->setMinimumHeight(100);
+
+    formLayout->addRow("Front:", frontEdit);
+    formLayout->addRow("Back:", backEdit);
+
+    auto* buttons = new QDialogButtonBox(
+        QDialogButtonBox::Save | QDialogButtonBox::Cancel,
+        &dialog);
+
+    layout->addLayout(formLayout);
+    layout->addWidget(buttons);
+
+    connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() != QDialog::Accepted)
+    {
+        return;
+    }
+
+    QString front = frontEdit->toPlainText().trimmed();
+    QString back = backEdit->toPlainText().trimmed();
+
+    if (front.isEmpty() || back.isEmpty())
+    {
+        QMessageBox::warning(
+            this,
+            "Missing Information",
+            "Both front and back are required.");
+        return;
+    }
+
+    Flashcard flashcard;
+    flashcard.id = flashcardId;
+    flashcard.deckId = selectedDeckId;
+    flashcard.front = front.toStdString();
+    flashcard.back = back.toStdString();
+
+    if (flashcardRepository.update(flashcard))
+    {
+        loadFlashcards();
+    }
 }
 
 void MainWindow::deleteFlashcard(int row)
