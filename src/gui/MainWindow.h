@@ -21,6 +21,7 @@ private:
     void loadFlashcards();
     void onDeckSelected(int row);
     void createDeck();
+    void deleteDeck();
     void createFlashcard();
     void editFlashcard(int row);
     void deleteFlashcard(int row);

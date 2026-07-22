@@ -50,9 +50,5 @@ bool DatabaseManager::initializeSchema()
         return false;
     }
 
-    query.exec(R"(
-        INSERT OR IGNORE INTO decks (id, name)
-        VALUES (1, 'Default')
-    )");
     return true;
 }

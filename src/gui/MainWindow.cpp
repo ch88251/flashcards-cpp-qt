@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 
-#include <QToolBar>
+#include <QMenuBar>
 #include <QLabel>
 #include <QListWidget>
 #include <QListWidgetItem>
@@ -36,9 +36,12 @@ void MainWindow::setupUi()
 
     auto* centralWidget = new QWidget(this);
 
-    QToolBar* toolbar = addToolBar("Main");
-    QAction* addDeckAction = toolbar->addAction("Add Deck");
-    QAction* addFlashcardAction = toolbar->addAction("Add Flashcard");
+    QMenu* deckMenu = menuBar()->addMenu("Decks");
+    QAction* addDeckAction = deckMenu->addAction("Add Deck");
+    QAction* deleteDeckAction = deckMenu->addAction("Delete Deck");
+
+    QMenu* flashcardMenu = menuBar()->addMenu("Flashcards");
+    QAction* addFlashcardAction = flashcardMenu->addAction("Add Flashcard");
 
     connect(
         addDeckAction,
@@ -47,9 +50,15 @@ void MainWindow::setupUi()
         &MainWindow::createDeck);
 
     connect(
+        deleteDeckAction,
+        &QAction::triggered,
+        this,
+        &MainWindow::deleteDeck);
+
+    connect(
         addFlashcardAction,
         &QAction::triggered,
-        this,        
+        this,
         &MainWindow::createFlashcard);
 
     auto* mainLayout = new QVBoxLayout(centralWidget);
@@ -201,6 +210,37 @@ void MainWindow::createDeck()
     {
         loadDecks();
     }    
+}
+
+void MainWindow::deleteDeck()
+{
+    QListWidgetItem* item = deckList->currentItem();
+
+    if (!item)
+    {
+        QMessageBox::warning(this, "No Deck Selected", "Please select a deck to delete.");
+        return;
+    }
+
+    QString deckName = item->text();
+    int deckId = item->data(Qt::UserRole).toInt();
+
+    auto result = QMessageBox::question(
+        this,
+        "Delete Deck",
+        QString("Are you sure you want to delete the deck \"%1\" and all its flashcards?").arg(deckName));
+
+    if (result != QMessageBox::Yes)
+    {
+        return;
+    }
+
+    if (deckRepository.remove(deckId))
+    {
+        selectedDeckId = -1;
+        loadDecks();
+        loadFlashcards();
+    }
 }
 
 void MainWindow::createFlashcard()

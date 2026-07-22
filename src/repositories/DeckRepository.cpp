@@ -54,3 +54,36 @@ std::vector<Deck> DeckRepository::findAll()
 
     return decks;
 }
+
+bool DeckRepository::remove(int id)
+{
+    QSqlQuery deleteCards;
+    deleteCards.prepare(R"(
+        DELETE FROM cards
+        WHERE deck_id = :id
+    )");
+    deleteCards.bindValue(":id", id);
+
+    if (!deleteCards.exec())
+    {
+        qCritical() << "Failed to delete cards for deck:"
+                    << deleteCards.lastError().text();
+        return false;
+    }
+
+    QSqlQuery deleteDeck;
+    deleteDeck.prepare(R"(
+        DELETE FROM decks
+        WHERE id = :id
+    )");
+    deleteDeck.bindValue(":id", id);
+
+    if (!deleteDeck.exec())
+    {
+        qCritical() << "Failed to delete deck:"
+                    << deleteDeck.lastError().text();
+        return false;
+    }
+
+    return true;
+}
